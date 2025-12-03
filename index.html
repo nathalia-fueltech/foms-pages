@@ -327,81 +327,123 @@
         </form>
     </div>
 
-    <script>
-        document.getElementById('purchaseForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const data = {};
-            
-            for (let [key, value] of formData.entries()) {
-                if (key.includes('[]')) {
-                    const cleanKey = key.replace('[]', '');
-                    if (!data[cleanKey]) {
-                        data[cleanKey] = [];
-                    }
-                    data[cleanKey].push(value);
-                } else {
-                    data[key] = value;
+<script>
+    document.getElementById('purchaseForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = {};
+        
+        // Processa os dados do formulário
+        for (let [key, value] of formData.entries()) {
+            if (key.includes('[]')) {
+                const cleanKey = key.replace('[]', '');
+                if (!data[cleanKey]) {
+                    data[cleanKey] = [];
                 }
-            }
-            
-            console.log('Dados da solicitação:', data);
-            
-            document.getElementById('successMessage').style.display = 'block';
-            
-            setTimeout(() => {
-                document.getElementById('successMessage').style.display = 'none';
-                resetForm();
-            }, 3000);
-        });
-
-        function addItem() {
-            const container = document.getElementById('itemsContainer');
-            const newItem = document.createElement('div');
-            newItem.className = 'item-row';
-            newItem.innerHTML = `
-                <div class="form-group">
-                    <label>Descrição do Item <span class="required">*</span></label>
-                    <input type="text" name="itemDescricao[]" required>
-                </div>
-                <div class="form-group">
-                    <label>Quantidade <span class="required">*</span></label>
-                    <input type="number" name="itemQuantidade[]" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label>Valor Unitário (R$)</label>
-                    <input type="number" name="itemValor[]" step="0.01" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Unidade</label>
-                    <select name="itemUnidade[]">
-                        <option value="un">UN</option>
-                        <option value="kg">KG</option>
-                        <option value="lt">LT</option>
-                        <option value="cx">CX</option>
-                        <option value="pc">PC</option>
-                    </select>
-                </div>
-                <button type="button" class="btn btn-remove" onclick="removeItem(this)">×</button>
-            `;
-            container.appendChild(newItem);
-        }
-
-        function removeItem(button) {
-            button.closest('.item-row').remove();
-        }
-
-        function resetForm() {
-            document.getElementById('purchaseForm').reset();
-            const container = document.getElementById('itemsContainer');
-            const items = container.querySelectorAll('.item-row');
-            for (let i = 1; i < items.length; i++) {
-                items[i].remove();
+                data[cleanKey].push(value);
+            } else {
+                data[key] = value;
             }
         }
+        
+        console.log('Dados da solicitação:', data);
+        
+        // COLE AQUI A URL DO POWER AUTOMATE
+        const powerAutomateURL = 'COLE_AQUI_A_URL_DO_POWER_AUTOMATE';
+        
+        try {
+            // Desabilita o botão durante o envio
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Enviando...';
+            
+            // Envia para o Power Automate
+            const response = await fetch(powerAutomateURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                // Sucesso
+                document.getElementById('successMessage').style.display = 'block';
+                
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                    resetForm();
+                }, 3000);
+            } else {
+                // Erro
+                alert('Erro ao enviar solicitação. Tente novamente.');
+            }
+            
+            // Reabilita o botão
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
+            
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao enviar solicitação. Verifique sua conexão e tente novamente.');
+            
+            // Reabilita o botão
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = false;
+            submitButton.textContent = 'Enviar Solicitação';
+        }
+    });
 
+    function addItem() {
+        const container = document.getElementById('itemsContainer');
+        const newItem = document.createElement('div');
+        newItem.className = 'item-row';
+        newItem.innerHTML = `
+            <div class="form-group">
+                <label>Descrição do Item <span class="required">*</span></label>
+                <input type="text" name="itemDescricao[]" required>
+            </div>
+            <div class="form-group">
+                <label>Quantidade <span class="required">*</span></label>
+                <input type="number" name="itemQuantidade[]" min="1" required>
+            </div>
+            <div class="form-group">
+                <label>Valor Unitário (R$)</label>
+                <input type="number" name="itemValor[]" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+                <label>Unidade</label>
+                <select name="itemUnidade[]">
+                    <option value="un">UN</option>
+                    <option value="kg">KG</option>
+                    <option value="lt">LT</option>
+                    <option value="cx">CX</option>
+                    <option value="pc">PC</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-remove" onclick="removeItem(this)">×</button>
+        `;
+        container.appendChild(newItem);
+    }
+
+    function removeItem(button) {
+        button.closest('.item-row').remove();
+    }
+
+    function resetForm() {
+        document.getElementById('purchaseForm').reset();
+        const container = document.getElementById('itemsContainer');
+        const items = container.querySelectorAll('.item-row');
+        for (let i = 1; i < items.length; i++) {
+            items[i].remove();
+        }
+        // Define a data de hoje
         document.querySelector('input[name="data"]').valueAsDate = new Date();
-    </script>
+    }
+    // Define a data de hoje ao carregar a página
+    document.querySelector('input[name="data"]').valueAsDate = new Date();
+</script>
 </body>
 </html>
