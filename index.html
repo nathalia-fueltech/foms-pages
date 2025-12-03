@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitação de Compras</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #dc3545;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #dc3545;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            color: #555;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        label .required {
+            color: #e74c3c;
+        }
+
+        input, select, textarea {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #dc3545;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .items-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 40px;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: end;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-add {
+            background: #dc3545;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-add:hover {
+            background: #c82333;
+        }
+
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-remove:hover {
+            background: #c82333;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .item-row {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-remove {
+                width: 100%;
+                border-radius: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Solicitação de Compras</h1>
+        <p class="subtitle">Preencha todos os campos obrigatórios marcados com *</p>
+
+        <div class="success-message" id="successMessage">
+            Solicitação enviada com sucesso!
+        </div>
+
+        <form id="purchaseForm">
+            <div class="form-section">
+                <div class="section-title">Dados do Solicitante</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nome Completo <span class="required">*</span></label>
+                        <input type="text" name="nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Departamento <span class="required">*</span></label>
+                        <select name="departamento" required>
+                            <option value="">Selecione...</option>
+                            <option value="administrativo">Administrativo</option>
+                            <option value="financeiro">Financeiro</option>
+                            <option value="rh">Recursos Humanos</option>
+                            <option value="ti">Tecnologia da Informação</option>
+                            <option value="operacional">Operacional</option>
+                            <option value="marketing">Marketing</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>E-mail <span class="required">*</span></label>
+                        <input type="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="tel" name="telefone">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">Informações da Solicitação</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Data da Solicitação <span class="required">*</span></label>
+                        <input type="date" name="data" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Prioridade <span class="required">*</span></label>
+                        <select name="prioridade" required>
+                            <option value="">Selecione...</option>
+                            <option value="baixa">Baixa</option>
+                            <option value="media">Média</option>
+                            <option value="alta">Alta</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Centro de Custo</label>
+                        <input type="text" name="centroCusto">
+                    </div>
+                    <div class="form-group">
+                        <label>Projeto</label>
+                        <input type="text" name="projeto">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">Itens Solicitados</div>
+                <div class="items-section" id="itemsContainer">
+                    <div class="item-row">
+                        <div class="form-group">
+                            <label>Descrição do Item <span class="required">*</span></label>
+                            <input type="text" name="itemDescricao[]" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantidade <span class="required">*</span></label>
+                            <input type="number" name="itemQuantidade[]" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Unitário (R$)</label>
+                            <input type="number" name="itemValor[]" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Unidade</label>
+                            <select name="itemUnidade[]">
+                                <option value="un">UN</option>
+                                <option value="kg">KG</option>
+                                <option value="lt">LT</option>
+                                <option value="cx">CX</option>
+                                <option value="pc">PC</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-add" onclick="addItem()">+ Adicionar Item</button>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">Justificativa e Observações</div>
+                <div class="form-group full-width">
+                    <label>Justificativa <span class="required">*</span></label>
+                    <textarea name="justificativa" required placeholder="Descreva a necessidade e justificativa da compra..."></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label>Observações Adicionais</label>
+                    <textarea name="observacoes" placeholder="Informações complementares..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">Limpar</button>
+                <button type="submit" class="btn btn-primary">Enviar Solicitação</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('[]')) {
+                    const cleanKey = key.replace('[]', '');
+                    if (!data[cleanKey]) {
+                        data[cleanKey] = [];
+                    }
+                    data[cleanKey].push(value);
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            console.log('Dados da solicitação:', data);
+            
+            document.getElementById('successMessage').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+                resetForm();
+            }, 3000);
+        });
+
+        function addItem() {
+            const container = document.getElementById('itemsContainer');
+            const newItem = document.createElement('div');
+            newItem.className = 'item-row';
+            newItem.innerHTML = `
+                <div class="form-group">
+                    <label>Descrição do Item <span class="required">*</span></label>
+                    <input type="text" name="itemDescricao[]" required>
+                </div>
+                <div class="form-group">
+                    <label>Quantidade <span class="required">*</span></label>
+                    <input type="number" name="itemQuantidade[]" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Valor Unitário (R$)</label>
+                    <input type="number" name="itemValor[]" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Unidade</label>
+                    <select name="itemUnidade[]">
+                        <option value="un">UN</option>
+                        <option value="kg">KG</option>
+                        <option value="lt">LT</option>
+                        <option value="cx">CX</option>
+                        <option value="pc">PC</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-remove" onclick="removeItem(this)">×</button>
+            `;
+            container.appendChild(newItem);
+        }
+
+        function removeItem(button) {
+            button.closest('.item-row').remove();
+        }
+
+        function resetForm() {
+            document.getElementById('purchaseForm').reset();
+            const container = document.getElementById('itemsContainer');
+            const items = container.querySelectorAll('.item-row');
+            for (let i = 1; i < items.length; i++) {
+                items[i].remove();
+            }
+        }
+
+        document.querySelector('input[name="data"]').valueAsDate = new Date();
+    </script>
+</body>
+</html>
